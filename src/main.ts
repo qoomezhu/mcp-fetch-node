@@ -9,6 +9,9 @@ import { promisify } from 'node:util';
 import { config } from './config/config.js';
 import { fetchPrompt } from './fetch.prompt.js';
 import { fetchTool } from './fetch.tool.js';
+import { initializeServices } from './services/index.js';
+
+initializeServices();
 
 const mcp = new McpServer({
   name: 'mcp-fetch-node',
