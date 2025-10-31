@@ -1,10 +1,8 @@
 import { z, ZodTypeAny } from 'zod';
-import { config } from './config/config.js';
+import { getConfig } from './config/service.js';
 import { DEFAULT_USER_AGENT_AUTONOMOUS } from './constants.js';
-import { checkRobotsTxt } from './utils/check-robots-txt.js';
-import { cache } from './utils/lru-cache.js';
-import { paginate } from './utils/paginate.js';
-import { processURL } from './utils/process-url.js';
+import { getUrlPipeline } from './pipelines/index.js';
+import { Paginator } from './core/paginator.js';
 
 const name = 'fetch';
 
@@ -38,34 +36,25 @@ const parameters = {
 
 type Args = z.objectOutputType<typeof parameters, ZodTypeAny>;
 
-// ToolCallback<typeof parameters>
-const execute =
-  // TODO: use signal to handle cancellation
-  async ({ url, max_length, start_index, raw }: Args) => {
-    const userAgent = config['user-agent'] ?? DEFAULT_USER_AGENT_AUTONOMOUS;
+const execute = async ({ url, max_length, start_index, raw }: Args) => {
+  const config = getConfig();
+  const userAgent = config['user-agent'] ?? DEFAULT_USER_AGENT_AUTONOMOUS;
 
-    const cacheKey = `${url}||${userAgent}||${raw.toString()}`;
+  const pipeline = getUrlPipeline();
+  const { content, prefix } = await pipeline.process(
+    url,
+    userAgent,
+    raw,
+    config['ignore-robots-txt'],
+  );
 
-    const cached = cache.get(cacheKey);
+  const paginator = new Paginator();
+  const result = paginator.paginate(url, content, prefix, start_index, max_length);
 
-    let content, prefix;
-
-    if (cached) {
-      [content, prefix] = cached;
-    } else {
-      if (!config['ignore-robots-txt']) await checkRobotsTxt(url, userAgent);
-
-      [content, prefix] = await processURL(url, userAgent, raw);
-
-      cache.set(cacheKey, [content, prefix]);
-    }
-
-    const result = paginate(url, content, prefix, start_index, max_length);
-
-    return {
-      content: [{ type: 'text' as const, text: result }],
-    };
+  return {
+    content: [{ type: 'text' as const, text: result }],
   };
+};
 
 export const fetchTool = {
   name,

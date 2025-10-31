@@ -1,4 +1,6 @@
-import { createLRU } from 'lru.min';
+import { Cache } from '../core/cache.js';
+import { getConfig } from '../config/service.js';
 
-// TODO: make this configurable
-export const cache = createLRU<string, [string, string]>({ max: 50 });
+const config = getConfig();
+
+export const cache = new Cache<[string, string]>(config['cache-max-size']);

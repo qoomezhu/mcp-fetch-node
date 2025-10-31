@@ -1,8 +1,7 @@
 import { z, ZodTypeAny } from 'zod';
-import { config } from './config/config.js';
+import { getConfig } from './config/service.js';
 import { DEFAULT_USER_AGENT_MANUAL } from './constants.js';
-import { cache } from './utils/lru-cache.js';
-import { processURL } from './utils/process-url.js';
+import { getUrlPipeline } from './pipelines/index.js';
 
 const name = 'fetch';
 
@@ -14,23 +13,12 @@ const parameters = {
 
 type Args = z.objectOutputType<typeof parameters, ZodTypeAny>;
 
-// PromptCallback<typeof parameters>
 const execute = async ({ url }: Args) => {
+  const config = getConfig();
   const userAgent = config['user-agent'] ?? DEFAULT_USER_AGENT_MANUAL;
 
-  const cacheKey = `${url}||${userAgent}||false`;
-
-  const cached = cache.get(cacheKey);
-
-  let content, prefix;
-
-  if (cached) {
-    [content, prefix] = cached;
-  } else {
-    [content, prefix] = await processURL(url, userAgent, false);
-
-    cache.set(cacheKey, [content, prefix]);
-  }
+  const pipeline = getUrlPipeline();
+  const { content, prefix } = await pipeline.process(url, userAgent, false, true);
 
   const result = [prefix, content].join('\n').trim();
 

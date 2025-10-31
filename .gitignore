@@ -12,6 +12,11 @@ dist/
 .env.local
 .env.*.local
 
+# Config files
+config.json
+config.yaml
+config.yml
+
 # IDE
 .idea/
 .vscode/

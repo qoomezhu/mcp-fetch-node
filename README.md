@@ -39,7 +39,7 @@ docker run -it tgambet/mcp-fetch-node
 
 ### Customization - robots.txt
 
-By default, the server will obey a websites robots.txt file if the request came from the model (via a tool), but not if the request was user initiated (via a prompt). This can be disabled by adding the argument `--ignore-robots-txt` to the run command.
+By default, the server will obey a websites robots.txt file if the request came from the model (via a tool), but not if the request was user initiated (via a prompt). This can be disabled by adding the argument `--ignore-robots-txt` to the run command or by setting `MCP_FETCH_IGNORE_ROBOTS_TXT=true`.
 
 ### Customization - User-agent
 
@@ -53,7 +53,13 @@ ModelContextProtocol/1.0 (Autonomous; +https://github.com/tgambet/mcp-fetch-node
 ModelContextProtocol/1.0 (User-Specified; +https://github.com/tgambet/mcp-fetch-node)
 ```
 
-This can be customized by adding the argument `--user-agent=YourUserAgent` to the run command, which will override both.
+This can be customized by adding the argument `--user-agent=YourUserAgent` to the run command, or by setting `MCP_FETCH_USER_AGENT=YourUserAgent`, which overrides both defaults.
+
+### Configuration Sources
+
+Configuration values are resolved from (lowest → highest priority): defaults, `config.json`/`config.yaml` in the working directory, environment variables (`MCP_FETCH_PORT`, `MCP_FETCH_USER_AGENT`, `MCP_FETCH_IGNORE_ROBOTS_TXT`, `MCP_FETCH_CACHE_MAX_SIZE`), and CLI arguments (`--port`, `--user-agent`, `--ignore-robots-txt`, `--cache-max-size`).
+
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for a detailed breakdown of the modular architecture and configuration service.
 
 ## Key differences with the original project
 
