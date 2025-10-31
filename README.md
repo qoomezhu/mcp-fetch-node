@@ -55,6 +55,31 @@ ModelContextProtocol/1.0 (User-Specified; +https://github.com/tgambet/mcp-fetch-
 
 This can be customized by adding the argument `--user-agent=YourUserAgent` to the run command, which will override both.
 
+### Customization - Performance
+
+The server supports configurable concurrency and connection pooling for optimal performance:
+
+```bash
+# Request queue settings
+--concurrency 10              # Max concurrent requests (default: 10)
+--queue-timeout 30000         # Request timeout in ms (optional)
+--rate-limit 100              # Max requests per interval (optional)
+--rate-interval 60000         # Rate limit window in ms (optional)
+
+# Connection pool settings
+--pool-connections 100        # Max connections in pool (default: 100)
+--pool-pipelining 1           # HTTP pipelining level (default: 1)
+--pool-keepalive-timeout 4000 # Keep-alive timeout in ms (default: 4000)
+```
+
+For example, to run with 20 concurrent requests and a larger connection pool:
+
+```bash
+npx -y mcp-fetch-node --concurrency 20 --pool-connections 100
+```
+
+For more details on performance optimization and benchmarks, see [PERFORMANCE.md](./PERFORMANCE.md).
+
 ## Key differences with the original project
 
 - This implementation is written in TypeScript and targets the Node.js runtime.
@@ -75,8 +100,11 @@ Please report any issue to the [issue tracker](https://github.com/tgambet/mcp-fe
 - Fetch and extract relevant content from a URL
 - Respect `robots.txt` (can be disabled)
 - User-Agent customization
+- Configurable request queue with concurrency and rate limiting
+- Shared HTTP connection pool powered by Undici
 - Markdown conversion
 - Pagination
+- Built-in performance benchmarks (see [PERFORMANCE.md](./PERFORMANCE.md))
 
 ## Development
 
@@ -102,6 +130,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## TODO
 
 - [ ] Add user logs and progress
-- [ ] Add documentation & examples
-- [ ] Performance benchmarks and improvements
+- [x] Add documentation & examples
+- [x] Performance benchmarks and improvements
 - [ ] Benchmarks for extraction quality: cf https://github.com/adbar/trafilatura/blob/master/tests/comparison_small.py

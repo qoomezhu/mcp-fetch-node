@@ -14,7 +14,7 @@
     "lint:fix": "eslint src/** --fix",
     "format": "prettier --write \"**/*.{ts,json,md,yml,js}\"",
     "format:check": "prettier --check .",
-    "test": "node --import tsx --test tests/**/*.test.ts",
+    "test": "node tests/run-tests.cjs",
     "test:watch": "node --import tsx --test --watch tests/**/*.test.ts",
     "inspect": "pnpx @modelcontextprotocol/inspector",
     "fix": "pnpm format && pnpm lint:fix"
@@ -47,10 +47,12 @@
     "express": "^5.0.1",
     "linkedom": "^0.18.9",
     "lru.min": "^1.1.1",
+    "p-queue": "^9.0.0",
     "robots-parser": "^3.0.1",
     "sanitize-html": "^2.14.0",
     "turndown": "^7.2.0",
     "turndown-plugin-gfm": "^1.0.2",
+    "undici": "^7.16.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
