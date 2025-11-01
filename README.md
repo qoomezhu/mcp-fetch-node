@@ -67,10 +67,6 @@ Docker:
 docker run -it tgambet/mcp-fetch-node
 ```
 
-### Customization - robots.txt
-
-By default, the server will obey a websites robots.txt file if the request came from the model (via a tool), but not if the request was user initiated (via a prompt). This can be disabled by adding the argument `--ignore-robots-txt` to the run command.
-
 ### Customization - User-agent
 
 By default, depending on if the request came from the model (via a tool), or was user initiated (via a prompt), the server will use either the user-agent
@@ -128,13 +124,16 @@ Please report any issue to the [issue tracker](https://github.com/tgambet/mcp-fe
 ## Features
 
 - Fetch and extract relevant content from a URL
-- Respect `robots.txt` (can be disabled)
 - User-Agent customization
 - Configurable request queue with concurrency and rate limiting
 - Shared HTTP connection pool powered by Undici
 - Markdown conversion
 - Pagination
 - Built-in performance benchmarks (see [PERFORMANCE.md](./PERFORMANCE.md))
+
+## Important Notice
+
+**This server does not respect robots.txt files.** All URLs will be fetched unconditionally, regardless of robots.txt restrictions. Users are responsible for ensuring their use of this tool complies with applicable laws, terms of service, and ethical guidelines. Always respect website owners' wishes and rate limits to avoid overloading servers.
 
 ## Development
 

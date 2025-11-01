@@ -3,7 +3,6 @@ import { parseArgs } from '../utils/parse-args.js';
 
 export const argsSchema = z.object({
   'user-agent': z.string().optional(),
-  'ignore-robots-txt': z.boolean().optional(),
   port: z.coerce.number().optional().default(8080),
   'concurrency': z.coerce.number().optional().default(10),
   'queue-timeout': z.coerce.number().optional(),
@@ -20,4 +19,10 @@ export const argsSchema = z.object({
 
 export type Config = z.infer<typeof argsSchema>;
 
-export const config = argsSchema.parse(parseArgs());
+const parsedArgs = parseArgs();
+const envPort = process.env.PORT;
+
+export const config = argsSchema.parse({
+  ...parsedArgs,
+  port: envPort ? parseInt(envPort, 10) : parsedArgs.port,
+});
