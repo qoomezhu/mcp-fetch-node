@@ -13,6 +13,7 @@ describe('Fetch Prompt', () => {
     assert.ok(
       (result.messages[0].content.text as string).includes('Example Domain'),
     );
+    assert.ok(result.metadata?.title?.includes('Example Domain'));
   });
 
   it('should handle invalid URLs in prompt', async () => {
