@@ -19,4 +19,10 @@ export const argsSchema = z.object({
 
 export type Config = z.infer<typeof argsSchema>;
 
-export const config = argsSchema.parse(parseArgs());
+const parsedArgs = parseArgs();
+const envPort = process.env.PORT;
+
+export const config = argsSchema.parse({
+  ...parsedArgs,
+  port: envPort ? parseInt(envPort, 10) : parsedArgs.port,
+});
