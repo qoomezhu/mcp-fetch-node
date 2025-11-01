@@ -32,23 +32,25 @@ describe('Utility Functions', () => {
 
   describe('processURL', () => {
     it('should process HTML content', async () => {
-      const [content, prefix] = await processURL(
+      const result = await processURL(
         'https://example.com',
         'test-user-agent',
         false,
       );
-      assert.ok(content.length > 0);
-      assert.equal(prefix, '');
+      assert.ok(result.content.length > 0);
+      assert.equal(result.prefix, '');
+      assert.ok(result.metadata.title);
     });
 
     it('should handle raw content request', async () => {
-      const [content, prefix] = await processURL(
+      const result = await processURL(
         'https://example.com',
         'test-user-agent',
         true,
       );
-      assert.ok(content.includes('<html'));
-      assert.ok(prefix.includes('raw'));
+      assert.ok(result.content.includes('<html'));
+      assert.ok(result.prefix.includes('raw'));
+      assert.ok(result.metadata.title);
     });
   });
 });

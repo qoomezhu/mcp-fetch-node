@@ -14,6 +14,8 @@ describe('Fetch Tool', () => {
     assert.ok(result.content);
     assert.equal(result.content[0].type, 'text');
     assert.ok(result.content[0].text.includes('Example Domain'));
+    assert.ok(result.metadata);
+    assert.ok(result.metadata?.title?.includes('Example Domain'));
   });
 
   it('should respect max_length parameter', async () => {
@@ -26,6 +28,7 @@ describe('Fetch Tool', () => {
     });
 
     assert.ok(result.content[0].text.length <= maxLength + 200); // Adding buffer for prefix text
+    assert.ok(result.metadata?.title);
   });
 
   it('should handle invalid URLs', async () => {

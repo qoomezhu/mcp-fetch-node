@@ -22,17 +22,19 @@ const execute = async ({ url }: Args) => {
 
   const cached = cache.get(cacheKey);
 
-  let content, prefix;
+  let processed = cached;
 
-  if (cached) {
-    [content, prefix] = cached;
-  } else {
-    [content, prefix] = await processURL(url, userAgent, false);
+  if (!processed) {
+    processed = await processURL(url, userAgent, false);
 
-    cache.set(cacheKey, [content, prefix]);
+    cache.set(cacheKey, processed);
   }
 
-  const result = [prefix, content].join('\n').trim();
+  if (!processed) {
+    throw new Error('Failed to process URL');
+  }
+
+  const result = [processed.prefix, processed.content].join('\n').trim();
 
   return {
     messages: [
@@ -41,6 +43,7 @@ const execute = async ({ url }: Args) => {
         content: { type: 'text', text: result },
       } as const,
     ],
+    metadata: processed.metadata,
   };
 };
 

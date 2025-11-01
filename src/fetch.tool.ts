@@ -48,22 +48,31 @@ const execute =
 
     const cached = cache.get(cacheKey);
 
-    let content, prefix;
+    let processed = cached;
 
-    if (cached) {
-      [content, prefix] = cached;
-    } else {
+    if (!processed) {
       if (!config['ignore-robots-txt']) await checkRobotsTxt(url, userAgent);
 
-      [content, prefix] = await processURL(url, userAgent, raw);
+      processed = await processURL(url, userAgent, raw);
 
-      cache.set(cacheKey, [content, prefix]);
+      cache.set(cacheKey, processed);
     }
 
-    const result = paginate(url, content, prefix, start_index, max_length);
+    if (!processed) {
+      throw new Error('Failed to process URL');
+    }
+
+    const result = paginate(
+      url,
+      processed.content,
+      processed.prefix,
+      start_index,
+      max_length,
+    );
 
     return {
       content: [{ type: 'text' as const, text: result }],
+      metadata: processed.metadata,
     };
   };
 

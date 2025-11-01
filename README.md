@@ -21,6 +21,36 @@ The fetch tool will truncate the response, but by using the `start_index` argume
 - `fetch` - Fetch a URL and extract its contents as markdown
   - `url` (string, required): URL to fetch
 
+### Metadata
+
+Both the fetch tool and the fetch prompt now return a `metadata` object in addition to the content payload. The metadata is validated with Zod and captures standard document attributes (`title`, `description`, `author`, `publishDate`, `keywords`, `language`, `charset`) alongside optional, format-specific structures such as Open Graph, Twitter Card, JSON/XML feed details, PDF document info, JSON-LD blocks, and microdata.
+
+A typical response from the tool looks like this:
+
+```json
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "…"
+    }
+  ],
+  "metadata": {
+    "title": "Example Domain",
+    "description": "This domain is for use in illustrative examples in documents.",
+    "language": "en",
+    "openGraph": {
+      "og:title": "Example Domain"
+    },
+    "twitterCard": {
+      "twitter:title": "Example Domain"
+    }
+  }
+}
+```
+
+The schema gracefully handles missing fields—when specific metadata cannot be determined the corresponding keys are simply omitted—so existing consumers can continue to use the payload without modification.
+
 ## Usage
 
 `mcp-fetch-node` exposes an SSE endpoint at `/sse` on port 8080 by default.
