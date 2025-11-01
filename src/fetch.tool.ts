@@ -5,6 +5,7 @@ import { checkRobotsTxt } from './utils/check-robots-txt.js';
 import { cache } from './utils/lru-cache.js';
 import { paginate } from './utils/paginate.js';
 import { processURL } from './utils/process-url.js';
+import { processURLStream } from './utils/process-url-stream.js';
 
 const name = 'fetch';
 
@@ -38,34 +39,40 @@ const parameters = {
 
 type Args = z.objectOutputType<typeof parameters, ZodTypeAny>;
 
-// ToolCallback<typeof parameters>
-const execute =
-  // TODO: use signal to handle cancellation
-  async ({ url, max_length, start_index, raw }: Args) => {
-    const userAgent = config['user-agent'] ?? DEFAULT_USER_AGENT_AUTONOMOUS;
+const execute = async (
+  { url, max_length, start_index, raw }: Args,
+  extra?: { signal?: AbortSignal },
+) => {
+  const signal = extra?.signal;
+  const userAgent = config['user-agent'] ?? DEFAULT_USER_AGENT_AUTONOMOUS;
 
-    const cacheKey = `${url}||${userAgent}||${raw.toString()}`;
+  const cacheKey = `${url}||${userAgent}||${raw.toString()}`;
 
-    const cached = cache.get(cacheKey);
+  const cached = cache.get(cacheKey);
 
-    let content, prefix;
+  let content: string;
+  let prefix: string;
 
-    if (cached) {
-      [content, prefix] = cached;
+  if (cached) {
+    [content, prefix] = cached;
+  } else {
+    if (!config['ignore-robots-txt']) await checkRobotsTxt(url, userAgent);
+
+    if (config['enable-streaming']) {
+      [content, prefix] = await processURLStream(url, userAgent, raw, signal);
     } else {
-      if (!config['ignore-robots-txt']) await checkRobotsTxt(url, userAgent);
-
       [content, prefix] = await processURL(url, userAgent, raw);
-
-      cache.set(cacheKey, [content, prefix]);
     }
 
-    const result = paginate(url, content, prefix, start_index, max_length);
+    cache.set(cacheKey, [content, prefix]);
+  }
 
-    return {
-      content: [{ type: 'text' as const, text: result }],
-    };
+  const result = paginate(url, content, prefix, start_index, max_length);
+
+  return {
+    content: [{ type: 'text' as const, text: result }],
   };
+};
 
 export const fetchTool = {
   name,

@@ -80,6 +80,26 @@ npx -y mcp-fetch-node --concurrency 20 --pool-connections 100
 
 For more details on performance optimization and benchmarks, see [PERFORMANCE.md](./PERFORMANCE.md).
 
+### Customization - Streaming
+
+The server supports streaming processing for improved memory efficiency with large HTML documents:
+
+```bash
+# Streaming settings
+--enable-streaming true       # Enable streaming pipeline (default: true)
+--stream-chunk-size 16384     # Chunk size in bytes (default: 16KB)
+--stream-timeout 30000        # Streaming timeout in ms (default: 30s)
+```
+
+Streaming mode processes content incrementally, reducing memory usage for large documents. When enabled:
+
+- HTML responses are processed in chunks as they arrive
+- Memory usage is limited to active chunks (typically <1MB) rather than full document size
+- Requests can be cancelled mid-stream via AbortSignal
+- SSE connection close automatically aborts ongoing fetch operations
+
+For more details on streaming functionality, see [STREAMING.md](./STREAMING.md).
+
 ## Key differences with the original project
 
 - This implementation is written in TypeScript and targets the Node.js runtime.
@@ -102,7 +122,8 @@ Please report any issue to the [issue tracker](https://github.com/tgambet/mcp-fe
 - User-Agent customization
 - Configurable request queue with concurrency and rate limiting
 - Shared HTTP connection pool powered by Undici
-- Markdown conversion
+- Markdown conversion with streaming pipeline support
+- Server Sent Events (SSE) streaming with cancellation
 - Pagination
 - Built-in performance benchmarks (see [PERFORMANCE.md](./PERFORMANCE.md))
 

@@ -45,6 +45,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.6.0",
     "express": "^5.0.1",
+    "htmlparser2": "^10.0.0",
     "linkedom": "^0.18.9",
     "lru.min": "^1.1.1",
     "p-queue": "^9.0.0",

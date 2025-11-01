@@ -16,6 +16,9 @@ export const argsSchema = z.object({
   'pool-connect-timeout': z.coerce.number().optional().default(10000),
   'pool-body-timeout': z.coerce.number().optional().default(300000),
   'pool-headers-timeout': z.coerce.number().optional().default(300000),
+  'enable-streaming': z.coerce.boolean().optional().default(true),
+  'stream-chunk-size': z.coerce.number().optional().default(16384),
+  'stream-timeout': z.coerce.number().optional().default(30000),
 });
 
 export type Config = z.infer<typeof argsSchema>;

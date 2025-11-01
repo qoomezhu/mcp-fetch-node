@@ -35,19 +35,24 @@ mcp.prompt(
 const app = express();
 
 const transports = new Map<string, SSEServerTransport>();
+const abortControllers = new Map<string, AbortController>();
 
 app.get('/sse', async (_req, res) => {
   const transport = new SSEServerTransport(`/messages`, res);
+  const abortController = new AbortController();
 
   transports.set(transport.sessionId, transport);
+  abortControllers.set(transport.sessionId, abortController);
 
   await mcp.connect(transport);
 
   res.on('close', () => {
+    abortController.abort();
     transport.close().catch((err: unknown) => {
       console.error(err);
     });
     transports.delete(transport.sessionId);
+    abortControllers.delete(transport.sessionId);
   });
 });
 

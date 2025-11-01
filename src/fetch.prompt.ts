@@ -3,6 +3,7 @@ import { config } from './config/config.js';
 import { DEFAULT_USER_AGENT_MANUAL } from './constants.js';
 import { cache } from './utils/lru-cache.js';
 import { processURL } from './utils/process-url.js';
+import { processURLStream } from './utils/process-url-stream.js';
 
 const name = 'fetch';
 
@@ -14,20 +15,25 @@ const parameters = {
 
 type Args = z.objectOutputType<typeof parameters, ZodTypeAny>;
 
-// PromptCallback<typeof parameters>
-const execute = async ({ url }: Args) => {
+const execute = async ({ url }: Args, extra?: { signal?: AbortSignal }) => {
+  const signal = extra?.signal;
   const userAgent = config['user-agent'] ?? DEFAULT_USER_AGENT_MANUAL;
 
   const cacheKey = `${url}||${userAgent}||false`;
 
   const cached = cache.get(cacheKey);
 
-  let content, prefix;
+  let content: string;
+  let prefix: string;
 
   if (cached) {
     [content, prefix] = cached;
   } else {
-    [content, prefix] = await processURL(url, userAgent, false);
+    if (config['enable-streaming']) {
+      [content, prefix] = await processURLStream(url, userAgent, false, signal);
+    } else {
+      [content, prefix] = await processURL(url, userAgent, false);
+    }
 
     cache.set(cacheKey, [content, prefix]);
   }

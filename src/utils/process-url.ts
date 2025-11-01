@@ -6,7 +6,11 @@ function isHTML(content: string, contentType?: string | null): boolean {
   return contentType?.includes('text/html') ?? content.includes('<html');
 }
 
-export async function processURL(url: string, userAgent: string, raw: boolean) {
+export async function processURL(
+  url: string,
+  userAgent: string,
+  raw: boolean,
+): Promise<[string, string]> {
   const { content, contentType } = await fetch(url, userAgent);
 
   if (!raw && isHTML(content, contentType)) {
