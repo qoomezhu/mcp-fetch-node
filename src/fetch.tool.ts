@@ -16,7 +16,7 @@ const parameters = {
     .number()
     .min(0)
     .max(1_000_000)
-    .default(5_000)
+    .default(10_000)
     .describe('Maximum number of characters to return. Default: 5000.'),
 
   start_index: z
