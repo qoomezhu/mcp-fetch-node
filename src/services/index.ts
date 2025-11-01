@@ -1,11 +1,13 @@
 import { config } from '../config/config.js';
+import { CircuitBreaker } from './circuit-breaker.js';
 import { configureConnectionPool } from './connection-pool.js';
 import { RequestManager } from './request-manager.js';
 
 let requestManager: RequestManager | null = null;
+let circuitBreaker: CircuitBreaker | null = null;
 
 export function initializeServices(): void {
-  if (requestManager) {
+  if (requestManager && circuitBreaker) {
     return;
   }
 
@@ -25,6 +27,12 @@ export function initializeServices(): void {
     intervalCap: config['rate-limit'],
     interval: config['rate-interval'],
   });
+
+  circuitBreaker = new CircuitBreaker({
+    failureThreshold: config['circuit-breaker-threshold'],
+    cooldownPeriod: config['circuit-breaker-cooldown'],
+    halfOpenMaxAttempts: 3,
+  });
 }
 
 export function getRequestManager(): RequestManager {
@@ -37,6 +45,18 @@ export function getRequestManager(): RequestManager {
   }
 
   return requestManager;
+}
+
+export function getCircuitBreaker(): CircuitBreaker {
+  if (!circuitBreaker) {
+    initializeServices();
+  }
+
+  if (!circuitBreaker) {
+    throw new Error('Services could not be initialized.');
+  }
+
+  return circuitBreaker;
 }
 
 export interface RequestQueueMetrics {
@@ -57,3 +77,4 @@ export function getRequestQueueMetrics(): RequestQueueMetrics {
 
 export * from './request-manager.js';
 export * from './connection-pool.js';
+export * from './circuit-breaker.js';

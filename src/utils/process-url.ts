@@ -1,3 +1,4 @@
+import { FetchError } from './errors.js';
 import { extract } from './extract.js';
 import { format } from './format.js';
 import { fetch } from './fetch.js';
@@ -7,23 +8,33 @@ function isHTML(content: string, contentType?: string | null): boolean {
 }
 
 export async function processURL(url: string, userAgent: string, raw: boolean) {
-  const { content, contentType } = await fetch(url, userAgent);
+  try {
+    const { content, contentType } = await fetch(url, userAgent);
 
-  if (!raw && isHTML(content, contentType)) {
-    const extracted = extract(content);
-    const formatted = format(extracted);
-    if (!formatted) {
-      return ['<error>Page failed to be simplified from HTML</error>', ''];
+    if (!raw && isHTML(content, contentType)) {
+      const extracted = extract(content);
+      const formatted = format(extracted);
+      if (!formatted) {
+        return ['<error>Page failed to be simplified from HTML</error>', ''];
+      }
+      return [formatted, ''];
     }
-    return [formatted, ''];
-  }
 
-  if (raw) {
-    return [content, `Here is the raw ${contentType ?? 'unknown'} content:`];
-  }
+    if (raw) {
+      return [content, `Here is the raw ${contentType ?? 'unknown'} content:`];
+    }
 
-  return [
-    content,
-    `Content type ${contentType ?? 'unknown'} cannot be simplified to markdown, but here is the raw content:`,
-  ];
+    return [
+      content,
+      `Content type ${contentType ?? 'unknown'} cannot be simplified to markdown, but here is the raw content:`,
+    ];
+  } catch (error) {
+    if (error instanceof FetchError) {
+      console.error(
+        `[ProcessURL] Error fetching ${url}: ${error.code} - ${error.message}`,
+      );
+      throw error;
+    }
+    throw error;
+  }
 }

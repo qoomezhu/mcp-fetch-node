@@ -70,7 +70,12 @@ describe('Performance Benchmarks', () => {
 
   afterEach(async () => {
     const dispatcher = getGlobalDispatcher();
-    if (dispatcher && dispatcher !== originalDispatcher && 'close' in dispatcher && typeof dispatcher.close === 'function') {
+    if (
+      dispatcher &&
+      dispatcher !== originalDispatcher &&
+      'close' in dispatcher &&
+      typeof dispatcher.close === 'function'
+    ) {
       dispatcher.close();
     }
     setGlobalDispatcher(originalDispatcher);
@@ -95,7 +100,9 @@ describe('Performance Benchmarks', () => {
       console.log(`  Total Requests: ${result.totalRequests}`);
       console.log(`  Duration: ${result.duration}ms`);
       console.log(`  Requests/sec: ${result.requestsPerSecond.toFixed(2)}`);
-      console.log(`  Avg Response Time: ${result.avgResponseTime.toFixed(2)}ms`);
+      console.log(
+        `  Avg Response Time: ${result.avgResponseTime.toFixed(2)}ms`,
+      );
       console.log('');
     }
 
@@ -138,7 +145,7 @@ describe('Performance Benchmarks', () => {
     console.log(`Small Pool (5 connections): ${smallPoolResult.duration}ms`);
     console.log(`Large Pool (50 connections): ${largePoolResult.duration}ms`);
     console.log(
-      `Performance gain: ${((smallPoolResult.duration - largePoolResult.duration) / smallPoolResult.duration * 100).toFixed(1)}%`,
+      `Performance gain: ${(((smallPoolResult.duration - largePoolResult.duration) / smallPoolResult.duration) * 100).toFixed(1)}%`,
     );
     console.log('');
 
@@ -193,7 +200,7 @@ describe('Performance Benchmarks', () => {
     );
 
     const duration = Date.now() - startTime;
-    const expectedMinDuration = ((totalRequests / rateLimit - 1) * interval);
+    const expectedMinDuration = (totalRequests / rateLimit - 1) * interval;
 
     console.log('\n=== Rate Limiting Test ===\n');
     console.log(`Rate Limit: ${rateLimit} requests per ${interval}ms`);

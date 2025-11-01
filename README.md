@@ -80,6 +80,35 @@ npx -y mcp-fetch-node --concurrency 20 --pool-connections 100
 
 For more details on performance optimization and benchmarks, see [PERFORMANCE.md](./PERFORMANCE.md).
 
+### Customization - Resilience
+
+The server implements robust error handling with retry strategies and circuit breaker patterns:
+
+```bash
+# Request timeout
+--request-timeout 30000            # Request timeout in ms (default: 30000)
+
+# Retry configuration
+--retry-max-attempts 3             # Max retry attempts (default: 3)
+--retry-initial-delay 1000         # Initial retry delay in ms (default: 1000)
+--retry-max-delay 10000            # Maximum retry delay in ms (default: 10000)
+
+# Circuit breaker configuration
+--circuit-breaker-threshold 5      # Failures before opening circuit (default: 5)
+--circuit-breaker-cooldown 60000   # Cooldown period in ms (default: 60000)
+```
+
+For example, to run with aggressive retry and tolerance settings:
+
+```bash
+npx -y mcp-fetch-node \
+  --retry-max-attempts 5 \
+  --circuit-breaker-threshold 10 \
+  --request-timeout 60000
+```
+
+For more details on resilience features, see [RESILIENCE.md](./RESILIENCE.md).
+
 ## Key differences with the original project
 
 - This implementation is written in TypeScript and targets the Node.js runtime.
@@ -102,6 +131,11 @@ Please report any issue to the [issue tracker](https://github.com/tgambet/mcp-fe
 - User-Agent customization
 - Configurable request queue with concurrency and rate limiting
 - Shared HTTP connection pool powered by Undici
+- **Robust error handling and retry mechanisms**
+  - Intelligent error classification (timeouts, DNS, 4xx, 5xx, etc.)
+  - Exponential backoff with jitter
+  - Circuit breaker pattern per domain
+  - Configurable request timeouts
 - Markdown conversion
 - Pagination
 - Built-in performance benchmarks (see [PERFORMANCE.md](./PERFORMANCE.md))

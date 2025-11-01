@@ -1,40 +1,57 @@
-import { getRequestManager } from '../services/index.js';
+import { config } from '../config/config.js';
+import { getCircuitBreaker, getRequestManager } from '../services/index.js';
+import { classifyError, createHttpError } from './errors.js';
+import { retryWithBackoff } from './retry.js';
 
-export class FetchError extends Error {
-  constructor(message: string, cause?: unknown) {
-    super(message, { cause });
-    this.name = 'FetchError';
-  }
-}
+export { FetchError } from './errors.js';
 
 export async function fetch(
   url: string,
   userAgent: string,
 ): Promise<{ content: string; contentType: string | null }> {
   const requestManager = getRequestManager();
+  const circuitBreaker = getCircuitBreaker();
 
   return requestManager.execute(async () => {
-    try {
-      const response = await global.fetch(url, {
-        redirect: 'follow',
-        headers: { 'User-Agent': userAgent },
-      });
+    return circuitBreaker.execute(url, async () => {
+      return retryWithBackoff(
+        async () => {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => {
+            controller.abort();
+          }, config['request-timeout']);
 
-      if (!response.ok) {
-        throw new FetchError(
-          `Failed to fetch ${url} - status code ${response.status.toString()}`,
-        );
-      }
+          try {
+            const response = await global.fetch(url, {
+              redirect: 'follow',
+              headers: { 'User-Agent': userAgent },
+              signal: controller.signal,
+            });
 
-      return {
-        content: await response.text(),
-        contentType: response.headers.get('content-type'),
-      };
-    } catch (error) {
-      if (error instanceof FetchError) {
-        throw error;
-      }
-      throw new FetchError(`Failed to fetch ${url}`, error);
-    }
+            if (!response.ok) {
+              throw createHttpError(url, response.status, response.statusText);
+            }
+
+            return {
+              content: await response.text(),
+              contentType: response.headers.get('content-type'),
+            };
+          } catch (error) {
+            throw classifyError(error, url);
+          } finally {
+            clearTimeout(timeoutId);
+          }
+        },
+        {
+          maxRetries: config['retry-max-attempts'],
+          initialDelay: config['retry-initial-delay'],
+          maxDelay: config['retry-max-delay'],
+          jitterFactor: 0.3,
+        },
+        {
+          url,
+        },
+      );
+    });
   });
 }

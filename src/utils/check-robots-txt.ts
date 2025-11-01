@@ -1,9 +1,12 @@
 import { URL } from 'url';
 import robotsParser, { Robot } from 'robots-parser';
+import { ErrorCode, ErrorType, FetchError } from './errors.js';
 
-export class RobotsTxtError extends Error {
+export class RobotsTxtError extends FetchError {
   constructor(message: string, cause?: unknown) {
-    super(message, { cause });
+    super(message, ErrorCode.ROBOTS_TXT_BLOCKED, ErrorType.NON_RETRYABLE, {
+      cause,
+    });
     this.name = 'RobotsTxtError';
   }
 }

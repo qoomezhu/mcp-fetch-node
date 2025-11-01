@@ -36,7 +36,12 @@ describe('Concurrent Fetch Integration', () => {
 
   afterEach(async () => {
     const dispatcher = getGlobalDispatcher();
-    if (dispatcher && dispatcher !== originalDispatcher && 'close' in dispatcher && typeof dispatcher.close === 'function') {
+    if (
+      dispatcher &&
+      dispatcher !== originalDispatcher &&
+      'close' in dispatcher &&
+      typeof dispatcher.close === 'function'
+    ) {
       dispatcher.close();
     }
     setGlobalDispatcher(originalDispatcher);
@@ -96,7 +101,9 @@ describe('Concurrent Fetch Integration', () => {
 
     console.log(`Low concurrency (1): ${lowConcurrencyDuration}ms`);
     console.log(`High concurrency (5): ${highConcurrencyDuration}ms`);
-    console.log(`Speedup: ${(lowConcurrencyDuration / highConcurrencyDuration).toFixed(2)}x`);
+    console.log(
+      `Speedup: ${(lowConcurrencyDuration / highConcurrencyDuration).toFixed(2)}x`,
+    );
 
     assert.ok(
       highConcurrencyDuration <= lowConcurrencyDuration,
@@ -119,8 +126,15 @@ describe('Concurrent Fetch Integration', () => {
 
     await Promise.all(tasks);
 
-    assert.ok(maxQueueDepth > 0, 'Queue depth should have increased during execution');
-    assert.equal(manager.queueDepth, 0, 'Queue should be empty after completion');
+    assert.ok(
+      maxQueueDepth > 0,
+      'Queue depth should have increased during execution',
+    );
+    assert.equal(
+      manager.queueDepth,
+      0,
+      'Queue should be empty after completion',
+    );
   });
 
   it('should handle mixed success and failure in concurrent requests', async () => {
@@ -170,6 +184,10 @@ describe('Concurrent Fetch Integration', () => {
 
     await Promise.all(tasks);
 
-    assert.equal(fetchCount, 5, 'All 5 requests should be executed without deduplication');
+    assert.equal(
+      fetchCount,
+      5,
+      'All 5 requests should be executed without deduplication',
+    );
   });
 });

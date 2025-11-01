@@ -30,8 +30,7 @@ describe('RequestManager', () => {
   });
 
   it('should track queue depth correctly', async () => {
-    const longTask = () =>
-      new Promise((resolve) => setTimeout(resolve, 100));
+    const longTask = () => new Promise((resolve) => setTimeout(resolve, 100));
 
     const task1 = manager.execute(longTask);
     const task2 = manager.execute(longTask);
@@ -59,7 +58,10 @@ describe('RequestManager', () => {
     );
 
     await Promise.all(tasks);
-    assert.ok(maxConcurrent <= 2, `Max concurrent was ${maxConcurrent}, expected <= 2`);
+    assert.ok(
+      maxConcurrent <= 2,
+      `Max concurrent was ${maxConcurrent}, expected <= 2`,
+    );
   });
 
   it('should handle task errors without breaking the queue', async () => {
@@ -122,7 +124,10 @@ describe('RequestManager', () => {
     await Promise.all(tasks);
     const duration = Date.now() - startTime;
 
-    assert.ok(duration >= 200, `Duration was ${duration}ms, expected >= 200ms for rate limiting`);
+    assert.ok(
+      duration >= 200,
+      `Duration was ${duration}ms, expected >= 200ms for rate limiting`,
+    );
   });
 
   it('should handle timeout configuration', async () => {
@@ -132,8 +137,7 @@ describe('RequestManager', () => {
     });
 
     const task = timeoutManager.execute(
-      async () =>
-        new Promise((resolve) => setTimeout(resolve, 200)),
+      async () => new Promise((resolve) => setTimeout(resolve, 200)),
     );
 
     await assert.rejects(task, /timed out/i);

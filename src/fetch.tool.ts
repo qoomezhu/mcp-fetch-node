@@ -38,22 +38,34 @@ const parameters = {
 
 type Args = z.objectOutputType<typeof parameters, ZodTypeAny>;
 
-// ToolCallback<typeof parameters>
-const execute =
-  // TODO: use signal to handle cancellation
-  async ({ url, max_length, start_index, raw }: Args) => {
-    const userAgent = config['user-agent'] ?? DEFAULT_USER_AGENT_AUTONOMOUS;
+const execute = async ({ url, max_length, start_index, raw }: Args) => {
+  const userAgent = config['user-agent'] ?? DEFAULT_USER_AGENT_AUTONOMOUS;
 
-    const cacheKey = `${url}||${userAgent}||${raw.toString()}`;
+  const cacheKey = `${url}||${userAgent}||${raw.toString()}`;
 
-    const cached = cache.get(cacheKey);
+  const cached = cache.get(cacheKey);
 
-    let content, prefix;
+  let content: string;
+  let prefix: string;
 
+  try {
     if (cached) {
       [content, prefix] = cached;
     } else {
-      if (!config['ignore-robots-txt']) await checkRobotsTxt(url, userAgent);
+      if (!config['ignore-robots-txt']) {
+        try {
+          await checkRobotsTxt(url, userAgent);
+        } catch (error) {
+          const message =
+            error instanceof Error
+              ? error.message
+              : 'Access blocked by robots.txt';
+          console.error(
+            `[FetchTool] robots.txt check failed for ${url}: ${message}`,
+          );
+          throw error;
+        }
+      }
 
       [content, prefix] = await processURL(url, userAgent, raw);
 
@@ -65,7 +77,25 @@ const execute =
     return {
       content: [{ type: 'text' as const, text: result }],
     };
-  };
+  } catch (error) {
+    console.error(
+      `[FetchTool] Failed to fetch ${url}:`,
+      error instanceof Error ? error.message : String(error),
+    );
+
+    const errorMessage =
+      error instanceof Error && 'toUserMessage' in error
+        ? (error as { toUserMessage(): string }).toUserMessage()
+        : error instanceof Error
+          ? error.message
+          : 'An unexpected error occurred while fetching the URL.';
+
+    return {
+      content: [{ type: 'text' as const, text: `Error: ${errorMessage}` }],
+      isError: true,
+    };
+  }
+};
 
 export const fetchTool = {
   name,

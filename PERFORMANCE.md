@@ -58,20 +58,20 @@ Based on automated performance tests:
 ### Concurrency Impact
 
 | Concurrency Level | Requests/Second | Speedup vs Sequential |
-|-------------------|-----------------|----------------------|
-| 1 (Sequential)    | 83.33           | 1.0x                 |
-| 5                 | 416.67          | 5.0x                 |
-| 10                | 612.24          | 7.3x                 |
-| 20                | 697.67          | 8.4x                 |
+| ----------------- | --------------- | --------------------- |
+| 1 (Sequential)    | 83.33           | 1.0x                  |
+| 5                 | 416.67          | 5.0x                  |
+| 10                | 612.24          | 7.3x                  |
+| 20                | 697.67          | 8.4x                  |
 
 **Key Finding**: Higher concurrency levels provide significant throughput improvements, with diminishing returns beyond 10-20 concurrent requests for typical workloads.
 
 ### Connection Pool Impact
 
-| Pool Size | Duration | Performance Gain |
-|-----------|----------|------------------|
-| 5 connections  | 52ms | Baseline |
-| 50 connections | 34ms | +34.6% |
+| Pool Size      | Duration | Performance Gain |
+| -------------- | -------- | ---------------- |
+| 5 connections  | 52ms     | Baseline         |
+| 50 connections | 34ms     | +34.6%           |
 
 **Key Finding**: Larger connection pools reduce latency by enabling better connection reuse and reducing connection setup overhead.
 
@@ -94,11 +94,13 @@ Based on automated performance tests:
 In practical usage scenarios:
 
 ### High-Concurrency Scenario
+
 - **20 concurrent fetch requests** completed in ~136ms
 - **Throughput**: ~147 requests/second
 - **Resource Usage**: Controlled via queue management
 
 ### Sequential vs Concurrent
+
 - **10 requests at concurrency=1**: 516ms
 - **10 requests at concurrency=5**: 107ms
 - **Performance gain**: 4.8x faster
@@ -108,16 +110,19 @@ In practical usage scenarios:
 ### Recommended Settings
 
 **For standard web scraping:**
+
 ```bash
 --concurrency 10 --pool-connections 50
 ```
 
 **For high-throughput scenarios:**
+
 ```bash
 --concurrency 20 --pool-connections 100 --pool-pipelining 2
 ```
 
 **For rate-limited APIs:**
+
 ```bash
 --concurrency 5 --rate-limit 10 --rate-interval 1000
 ```
@@ -142,6 +147,7 @@ Comprehensive test coverage includes:
 - ✅ Performance benchmarks
 
 Run tests with:
+
 ```bash
 npm test
 ```

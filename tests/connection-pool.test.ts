@@ -1,6 +1,11 @@
 import assert from 'node:assert';
 import { describe, it, beforeEach, afterEach } from 'node:test';
-import { getGlobalDispatcher, setGlobalDispatcher, Agent, Dispatcher } from 'undici';
+import {
+  getGlobalDispatcher,
+  setGlobalDispatcher,
+  Agent,
+  Dispatcher,
+} from 'undici';
 import { configureConnectionPool } from '../src/services/connection-pool.js';
 import { createTestServer, type TestServer } from './helpers/test-server.js';
 
@@ -19,7 +24,12 @@ describe('Connection Pool', () => {
 
   afterEach(async () => {
     const dispatcher = getGlobalDispatcher();
-    if (dispatcher && dispatcher !== originalDispatcher && 'close' in dispatcher && typeof dispatcher.close === 'function') {
+    if (
+      dispatcher &&
+      dispatcher !== originalDispatcher &&
+      'close' in dispatcher &&
+      typeof dispatcher.close === 'function'
+    ) {
       dispatcher.close();
     }
     setGlobalDispatcher(originalDispatcher);
@@ -57,9 +67,7 @@ describe('Connection Pool', () => {
 
     const urls = [server.url, server.url, server.url];
 
-    const results = await Promise.all(
-      urls.map((url) => fetch(url)),
-    );
+    const results = await Promise.all(urls.map((url) => fetch(url)));
 
     assert.equal(results.length, 3);
     for (const response of results) {
