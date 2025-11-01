@@ -73,14 +73,30 @@ const server = app.listen(config.port);
 
 console.log(`Server is running on port ${config.port.toString()}`);
 
-const readline = createInterface({ input, output });
+const isContainer = process.env.NODE_ENV === 'production' || process.env.DOCKER_CONTAINER === 'true';
 
-await readline.question('Press enter to exit...\n');
+if (!isContainer && process.stdin.isTTY) {
+  const readline = createInterface({ input, output });
 
-readline.close();
+  await readline.question('Press enter to exit...\n');
 
-server.closeAllConnections();
+  readline.close();
 
-await promisify(server.close.bind(server))();
+  server.closeAllConnections();
 
-await mcp.close();
+  await promisify(server.close.bind(server))();
+
+  await mcp.close();
+} else {
+  // In container mode, keep the server running and handle signals
+  const shutdown = async () => {
+    console.log('Shutting down...');
+    server.closeAllConnections();
+    await promisify(server.close.bind(server))();
+    await mcp.close();
+    process.exit(0);
+  };
+
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
+}
