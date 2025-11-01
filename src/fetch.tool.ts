@@ -1,7 +1,6 @@
 import { z, ZodTypeAny } from 'zod';
 import { config } from './config/config.js';
 import { DEFAULT_USER_AGENT_AUTONOMOUS } from './constants.js';
-import { checkRobotsTxt } from './utils/check-robots-txt.js';
 import { cache } from './utils/lru-cache.js';
 import { paginate } from './utils/paginate.js';
 import { processURL } from './utils/process-url.js';
@@ -53,8 +52,6 @@ const execute =
     if (cached) {
       [content, prefix] = cached;
     } else {
-      if (!config['ignore-robots-txt']) await checkRobotsTxt(url, userAgent);
-
       [content, prefix] = await processURL(url, userAgent, raw);
 
       cache.set(cacheKey, [content, prefix]);
