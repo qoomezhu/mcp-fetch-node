@@ -4,7 +4,7 @@ A port of the official [Fetch MCP Server](https://github.com/modelcontextprotoco
 
 ## Description
 
-A [Model Context Protocol](https://modelcontextprotocol.io/) server that provides web content fetching capabilities. This server enables LLMs to retrieve and process content from web pages, converting HTML to markdown for easier consumption.
+A [Model Context Protocol](https://modelcontextprotocol.io/) server that provides web content fetching capabilities. This server enables LLMs to retrieve and process content from web pages and APIs, converting HTML, JSON, XML, and PDF payloads to markdown for easier consumption.
 
 The fetch tool will truncate the response, but by using the `start_index` argument, you can specify where to start the content extraction. This lets models read a webpage in chunks, until they find the information they need.
 
@@ -55,6 +55,19 @@ ModelContextProtocol/1.0 (User-Specified; +https://github.com/tgambet/mcp-fetch-
 
 This can be customized by adding the argument `--user-agent=YourUserAgent` to the run command, which will override both.
 
+### Customization - Content processors
+
+The server uses a plugin system to process responses. Each plugin can be enabled/disabled and tuned via CLI flags.
+
+| Plugin | Purpose | Useful flags |
+| --- | --- | --- |
+| HTML | Readability score + heuristic extraction with sanitized Turndown markdown | `--plugin-html false`, `--plugin-html-max-bytes <bytes>` |
+| JSON | Pretty-print JSON with schema-aware summaries | `--plugin-json false`, `--plugin-json-max-bytes <bytes>`, `--plugin-json-summary-threshold <chars>`, `--plugin-json-sample-size <count>` |
+| XML | Convert XML (including RSS/Atom) to structured markdown | `--plugin-xml false`, `--plugin-xml-max-bytes <bytes>`, `--plugin-xml-feed-items <count>` |
+| PDF | Extract text from PDF documents and render markdown paragraphs | `--plugin-pdf false`, `--plugin-pdf-max-bytes <bytes>`, `--plugin-pdf-page-limit <pages>` |
+
+When a plugin exposes metadata (for example, detected article title or PDF page counts) it is emitted as a short prefix before the markdown payload so downstream consumers can capture it.
+
 ### Customization - Performance
 
 The server supports configurable concurrency and connection pooling for optimal performance:
@@ -88,8 +101,7 @@ For more details on performance optimization and benchmarks, see [PERFORMANCE.md
 - This implementation provides an SSE interface instead of stdio.
   It is more suitable for deployment as a web service, increasing flexibility.
 
-- This implementation does not rely on Readability.js library for content extraction.
-  It uses a custom implementation that is more generic and suited for websites other that news-related ones.
+- This implementation ships with a plugin-based content pipeline that combines Mozilla Readability scoring with custom heuristics, improving primary content extraction across a wide variety of sites.
 
 The api and tool description is, however, the same as the original project so you can try `mcp-fetch-node` as a drop-in replacement for the original project.
 
@@ -98,6 +110,7 @@ Please report any issue to the [issue tracker](https://github.com/tgambet/mcp-fe
 ## Features
 
 - Fetch and extract relevant content from a URL
+- Plugin-based processors for HTML, JSON, XML (RSS/Atom aware), and PDF responses
 - Respect `robots.txt` (can be disabled)
 - User-Agent customization
 - Configurable request queue with concurrency and rate limiting

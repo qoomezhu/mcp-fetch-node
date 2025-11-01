@@ -1,17 +1,11 @@
 import TurndownService from 'turndown';
 // @ts-expect-error : missing types
 import turndownPluginGfm from 'turndown-plugin-gfm';
+import { FormatError } from '../content/errors.js';
 
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
-
-export class FormatError extends Error {
-  constructor(message: string, cause?: unknown) {
-    super(message, { cause });
-    this.name = 'FormatError';
-  }
-}
 
 const turndownService = new TurndownService({
   headingStyle: 'atx',

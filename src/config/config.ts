@@ -16,6 +16,18 @@ export const argsSchema = z.object({
   'pool-connect-timeout': z.coerce.number().optional().default(10000),
   'pool-body-timeout': z.coerce.number().optional().default(300000),
   'pool-headers-timeout': z.coerce.number().optional().default(300000),
+  'plugin-html': z.coerce.boolean().optional(),
+  'plugin-html-max-bytes': z.coerce.number().optional(),
+  'plugin-json': z.coerce.boolean().optional(),
+  'plugin-json-max-bytes': z.coerce.number().optional(),
+  'plugin-json-summary-threshold': z.coerce.number().optional(),
+  'plugin-json-sample-size': z.coerce.number().optional(),
+  'plugin-xml': z.coerce.boolean().optional(),
+  'plugin-xml-max-bytes': z.coerce.number().optional(),
+  'plugin-xml-feed-items': z.coerce.number().optional(),
+  'plugin-pdf': z.coerce.boolean().optional(),
+  'plugin-pdf-max-bytes': z.coerce.number().optional(),
+  'plugin-pdf-page-limit': z.coerce.number().optional(),
 });
 
 export type Config = z.infer<typeof argsSchema>;
