@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  mcp-fetch:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mcp-fetch-node:latest
+    container_name: mcp-fetch-node
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      # Port configuration (overrides default)
+      - PORT=${PORT:-8080}
+      
+      # Optional: User-agent customization
+      # - USER_AGENT=CustomUserAgent/1.0
+      
+      # Optional: Ignore robots.txt
+      # - IGNORE_ROBOTS_TXT=true
+      
+      # Optional: Performance tuning
+      # - CONCURRENCY=10
+      # - QUEUE_TIMEOUT=30000
+      # - RATE_LIMIT=100
+      # - RATE_INTERVAL=60000
+      # - POOL_CONNECTIONS=100
+      # - POOL_PIPELINING=1
+      # - POOL_KEEPALIVE_TIMEOUT=4000
+    restart: unless-stopped
+    # Optional: Volume mount for development
+    # volumes:
+    #   - ./dist:/app/dist:ro
+    # healthcheck:
+    #   test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/sse"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 10s
+
+  # Optional: Development service with hot-reload
+  mcp-fetch-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: mcp-fetch-node-dev
+    ports:
+      - "${DEV_PORT:-8081}:8080"
+    environment:
+      - PORT=8080
+      - NODE_ENV=development
+    volumes:
+      - ./src:/app/src:ro
+      - ./dist:/app/dist
+    command: sh -c "pnpm dev"
+    profiles:
+      - dev

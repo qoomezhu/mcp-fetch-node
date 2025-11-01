@@ -1,8 +1,16 @@
-# Dependencies
+# Dependencies (will be installed in container)
 node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+*.tsbuildinfo
 
 # Testing
 coverage/
+tests/
+*.test.ts
+*.test.js
 
 # Environment variables
 .env
@@ -12,17 +20,41 @@ coverage/
 # IDE
 .idea/
 .vscode/
+*.swp
+*.swo
+*~
 
 # OS
 .DS_Store
-Thumbs.db 
+Thumbs.db
+*.log
 
-# Others
-src/
-tests/
+# Git
 .git
 .github
 .gitignore
-.prettierrc
+.gitattributes
+
+# Documentation (not needed in container)
+*.md
+!README.md
+LICENSE.md
+
+# CI/CD
 .releaserc.yml
+
+# Development tools
+.prettierrc
+.prettierignore
 eslint.config.js
+.eslintrc*
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Misc
+*.bak
+*.tmp
+*.cache

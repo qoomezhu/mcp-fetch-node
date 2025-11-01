@@ -37,6 +37,17 @@ Docker:
 docker run -it tgambet/mcp-fetch-node
 ```
 
+For detailed Docker deployment instructions, including clawcloud run deployment, see [DEPLOYMENT.md](./DEPLOYMENT.md).
+
+### Customization - Port
+
+By default, the server listens on port 8080. You can customize this using either:
+
+- Command-line argument: `--port=3000`
+- Environment variable: `PORT=3000` (takes precedence)
+
+The `PORT` environment variable is particularly useful for cloud deployments (e.g., clawcloud run) that dynamically assign ports.
+
 ### Customization - robots.txt
 
 By default, the server will obey a websites robots.txt file if the request came from the model (via a tool), but not if the request was user initiated (via a prompt). This can be disabled by adding the argument `--ignore-robots-txt` to the run command.
