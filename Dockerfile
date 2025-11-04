@@ -1,44 +1,47 @@
 # 优化的 Dockerfile，适配 ClawCloud Run
 
-# 第一阶段：构建阶段
+# ==================================
+# 第一阶段：构建阶段 (Builder Stage)
+# ==================================
 FROM node:22-alpine AS builder
 
 # 安装 pnpm
 RUN corepack enable && corepack prepare pnpm@latest-10 --activate
 
-# 设置工作目录
 WORKDIR /app
 
-# 复制依赖文件
+# 复制依赖描述文件
 COPY package.json pnpm-lock.yaml ./
 
-# 安装依赖
+# 安装所有依赖，包括 devDependencies，用于构建
 RUN pnpm install --frozen-lockfile
 
-# 复制源代码
+# 复制所有源代码
 COPY . .
 
-# 构建应用程序
+# 执行构建命令 (tsc)
 RUN pnpm run build
 
-# 第二阶段：运行阶段
+# (可选) 为了优化最终镜像大小，可以只为生产依赖重新运行install
+RUN pnpm install --prod --frozen-lockfile
+
+
+# ==================================
+# 第二阶段：运行阶段 (Runner Stage)
+# ==================================
 FROM node:22-alpine
 
-# 安装 pnpm
-RUN corepack enable && corepack prepare pnpm@latest-10 --activate
-
-# 设置工作目录
 WORKDIR /app
-
-# 从构建阶段复制构建后的文件
-COPY --from=builder /app/dist .
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json .
-COPY --from=builder /app/pnpm-lock.yaml .
 
 # 创建非 root 用户
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
+
+# 从构建阶段复制构建产物和生产依赖
+# 这样可以避免在最终镜像中包含 devDependencies
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json .
 
 # 设置用户权限
 RUN chown -R nodejs:nodejs /app
